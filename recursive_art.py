@@ -3,7 +3,6 @@ This program generates random art
 @author Kevin Guo
 """
 
-
 import random
 import math
 from PIL import Image
@@ -40,6 +39,12 @@ def build_random_function(min_depth, max_depth):
         return [rand1,build_random_function(min_depth-1,max_depth-1)]
 
 def lambda_function(min_depth, max_depth):
+    """
+    Use lambda functions to generate a random function to generate art. The function recurses to a random depth between min_depth and max_depth while
+    evaluating this function and returns a function that is then evaluated.
+    Referenced Sophie's return code
+    """
+    #Creates references for lamba functions
     prod = lambda x,y: x*y
     avg = lambda x,y: .5*(x+y)
     cos_pi = lambda x,y: math.cos(math.pi*x)
@@ -51,39 +56,23 @@ def lambda_function(min_depth, max_depth):
 
     lambda_list = [prod, avg, cos_pi, sin_pi, sqr, ab, returnx, returny]
 
-    # lst1 = ["prod","avg","cos_pi","sin_pi","sqr","abs","x","y"]
-    # rand1 = random.choice(lst1)
-    # contin = random.choice([0,1])
-    
-    choose = random.choice(['x','y'])
-    if("choose" == 'x'):
-        base = lambda x,y: x
-    else:
-        base = lambda x,y: y
+    #Random depth option
+    contin = random.choice([0,1])
+
+    #Returns random base case
+    base = random.choice([returnx, returny])
     
     if(min_depth <= 0):
         if(max_depth == 0):
             return base
         if(contin == 0):
             return base
-    return lambda x,y: random.choice(lambda_list)(x,y)
-    # if(rand1 == "prod"):
-    #     return lambda x,y: lambda_function(min_depth-1, max_depth-1)(x,y) * lambda_function(min_depth-1, max_depth-1)(x,y)
-    # if(rand1 == "avg"):
-    #     return lambda x,y: .5(lambda_function(min_depth-1, max_depth-1)(x,y) + lambda_function(min_depth-1, max_depth-1))(x,y)
-    # if(rand1 == "cos_pi"):
-    #     return lambda x,y: math.cos(math.pi*lambda_function(min_depth-1, max_depth-1)(x,y))
-    # if(rand1 == "sin_pi"):
-    #     return lambda x,y: math.sin(math.pi*lambda_function(min_depth-1, max_depth-1)(x,y))
-    # if(rand1 == "sqr"):
-    #     return lambda x,y: lambda_function(min_depth-1, max_depth-1)(x,y) **2
-    # if(rand1 == "abs"):
-    #     return lambda x,y: math.fabs(lambda_function(min_depth-1, max_depth-1))(x,y)
-    # if(rand1 == "x"):
-    #     return lambda x,y: lambda_function(min_depth-1, max_depth-1)(x,y)
-    # if(rand1 == "y"):
-    #     return lambda x,y: lambda_function(min_depth-1, max_depth-1)(x,y)
 
+    function = random.choice(lambda_list)
+    #creates inputs for the randomly generated function to recurse into
+    input_x = lambda_function(min_depth-1, max_depth-1)
+    input_y = lambda_function(min_depth-1, max_depth-1)
+    return lambda x,y: function(input_x(x,y),input_y(x,y))
 
 def evaluate_random_function(f, x, y):
     """ Evaluate the random function f with inputs x,y
@@ -167,7 +156,6 @@ def color_map(val):
         >>> color_map(0.5)
         191
     """
-    # NOTE: This relies on remap_interval, which you must provide
     color_code = remap_interval(val, -1, 1, 0, 255)
     return int(color_code)
 
@@ -199,26 +187,22 @@ def generate_art(filename, x_size=350, y_size=350):
         x_size, y_size: optional args to set image dimensions (default: 350)
     """
     # Functions for red, green, and blue channels - where the magic happens!
-    # red_function = build_random_function(7,9)
-    # green_function = build_random_function(7,9)
-    # blue_function = build_random_function(7,9)
-
-    # Create image and loop over all pixels
+    red_function = lambda_function(2,6)
+    green_function = lambda_function(2,6)
+    blue_function = lambda_function(2,6)
     im = Image.new("RGB", (x_size, y_size))
+    
+    # Create image and loop over all pixels
     pixels = im.load()
     for i in range(x_size):
         for j in range(y_size):
             x = remap_interval(i, 0, x_size, -1, 1)
             y = remap_interval(j, 0, y_size, -1, 1)
             pixels[i, j] = (
-                    # color_map(evaluate_random_function(red_function, x, y)),
-                    # color_map(evaluate_random_function(green_function, x, y)),
-                    # color_map(evaluate_random_function(blue_function, x, y))
-                    color_map(lambda_function(2,5)(x,y)),
-                    color_map(lambda_function(2,5)(x,y)),
-                    color_map(lambda_function(2,5)(x,y))
+                    color_map(red_function(x,y)),
+                    color_map(green_function(x,y)),
+                    color_map(blue_function(x,y))
                     )
-
     im.save(filename)
 
 
