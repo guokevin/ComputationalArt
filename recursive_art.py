@@ -206,17 +206,21 @@ def generate_art(filename, x_size=350, y_size=350):
     # Create image and loop over all pixels
     pixels = im.load()
 
+    #Create 100 frames
     for time in range(100):
+        #Scale time interval to appropriate range
         time_interval = remap_interval(time,0,100,-1,1)
         for i in range(x_size):
             for j in range(y_size):
                 x = remap_interval(i, 0, x_size, -1, 1)
                 y = remap_interval(j, 0, y_size, -1, 1)
                 pixels[i, j] = (
+                        #Implement time intervals into functions
                         color_map(red_function(x*time_interval,y*time_interval**2)),
                         color_map(green_function(x*time_interval**2,y*time_interval)),
                         color_map(blue_function(x*time_interval,y*time_interval))
                         )
+        #Save filename
         filename = "frame0{}.png".format(time)
         im.save(filename)
 
