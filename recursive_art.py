@@ -103,7 +103,7 @@ def evaluate_random_function(f, x, y):
         else:
             return y
 
-    #Evaluate the function based on f
+    #Evaluate the function based on the arguments of f
     if(f[0] == "x"):
         return evaluate_random_function(f[1],x,y)
     if(f[0] == "y"):
