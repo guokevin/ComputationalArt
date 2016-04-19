@@ -6,8 +6,6 @@ This program generates random art
 import random
 import math
 from PIL import Image
-import alsaaudio
-import audioop
 
 
 def build_random_function(min_depth, max_depth):
@@ -21,18 +19,26 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
+
+    #Create list of functions to pick from
     lst1 = ["prod","avg","cos_pi","sin_pi","sqr","abs","x","y"]
     lst2 = [["x"],["y"]]
 
+    #Choose random function
     rand1 = random.choice(lst1)
     rand2 = random.choice(lst2)
 
+    #Choose whether to continue recursing after reaching min depth
     contin = random.choice([0,1])
+
+    #Decide whether to continue recursing given depths and continuation status
     if(min_depth <= 0):
         if(max_depth == 0):
             return rand2
         if(contin == 0):
             return rand2   
+
+    #Determine what function to return given number of arguments
     if(rand1 not in ["cos_pi", "sin_pi", "sqr", "abs"]):
         return [rand1,build_random_function(min_depth-1,max_depth-1),build_random_function(min_depth-1,max_depth-1)]
     else:
@@ -54,6 +60,7 @@ def lambda_function(min_depth, max_depth):
     returnx = lambda x,y: x
     returny = lambda x,y: y
 
+    #Create possible list of lambda functions
     lambda_list = [prod, avg, cos_pi, sin_pi, sqr, ab, returnx, returny]
 
     #Random depth option
@@ -88,11 +95,15 @@ def evaluate_random_function(f, x, y):
         >>> evaluate_random_function(["y"],0.1,0.02)
         0.02
     """
+
+    #Base case if length of function is 1
     if(len(f) == 1):
         if(f[0] == "x"):
             return x
         else:
             return y
+
+    #Evaluate the function based on f
     if(f[0] == "x"):
         return evaluate_random_function(f[1],x,y)
     if(f[0] == "y"):
@@ -194,42 +205,22 @@ def generate_art(filename, x_size=350, y_size=350):
     
     # Create image and loop over all pixels
     pixels = im.load()
-    for i in range(x_size):
-        for j in range(y_size):
-            x = remap_interval(i, 0, x_size, -1, 1)
-            y = remap_interval(j, 0, y_size, -1, 1)
-            pixels[i, j] = (
-                    color_map(red_function(x,y)),
-                    color_map(green_function(x,y)),
-                    color_map(blue_function(x,y))
-                    )
-    im.save(filename)
+
+    for time in range(100):
+        time_interval = remap_interval(time,0,100,-1,1)
+        for i in range(x_size):
+            for j in range(y_size):
+                x = remap_interval(i, 0, x_size, -1, 1)
+                y = remap_interval(j, 0, y_size, -1, 1)
+                pixels[i, j] = (
+                        color_map(red_function(x*time_interval,y*time_interval**2)),
+                        color_map(green_function(x*time_interval**2,y*time_interval)),
+                        color_map(blue_function(x*time_interval,y*time_interval))
+                        )
+        filename = "frame0{}.png".format(time)
+        im.save(filename)
 
 
 if __name__ == '__main__':
-    # inp = alsaaudio.PCM(alsaaudio.PCM_CAPTURE,0)
-    # inp.setchannels(1)
-    # inp.setrate(16000)
-    # inp.setformat(alsaaudio.PCM_FORMAT_S16_LE)
-    # inp.setperiodsize(160)
-            
-    # while True:
-    #     l,data = inp.read()
-    #     if l:
-    #             print audioop.rms(data,2)
-    # import doctest
-    # doctest.testmod()
-    # doctest.run_docstring_examples(build_random_function,globals(),verbose=True)
-    # print(build_random_function(1,5))
-
-
-    # Create some computational art!
-    # TODO: Un-comment the generate_art function call after you
-    #       implement remap_interval and evaluate_random_function
     generate_art("myart7.png")
-
-    # Test that PIL is installed correctly
-    # TODO: Comment or remove this function call after testing PIL install
-    # test_image("noise.png")
-    # image_viewer()
 
